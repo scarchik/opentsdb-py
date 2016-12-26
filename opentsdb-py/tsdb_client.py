@@ -6,10 +6,10 @@ import queue
 import time
 from os import environ
 
-from exceptions import MetricDuplicated, ValidationError
-from tsdb_connect import TSDBConnect
-from push_thread import PushThread
-from metrics import Metric
+from .exceptions import MetricDuplicated, ValidationError
+from .tsdb_connect import TSDBConnect
+from .push_thread import PushThread
+from .metrics import Metric
 
 logger = logging.getLogger('opentsdb-py')
 
