@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from opentsdb import __version__
 
@@ -8,7 +8,7 @@ setup(
     version=__version__,
     author='Sergey Suglobov',
     author_email='s.suglobov@gmail.com',
-    py_modules=['opentsdb'],
+    packages=find_packages(),
     keywords="opentsdb, tsdb",
     url='https://github.com/scarchik/opentsdb-py',
     description='Python client for OpenTSDB',
