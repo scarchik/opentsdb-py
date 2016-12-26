@@ -1,9 +1,11 @@
 from setuptools import setup
 
+from opentsdb import __version__
+
 
 setup(
     name='opentsdb-py',
-    version='0.1.0',
+    version=__version__,
     author='Sergey Suglobov',
     author_email='s.suglobov@gmail.com',
     py_modules=['opentsdb'],
