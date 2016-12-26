@@ -3,7 +3,7 @@ Python client for OpenTSDB
 
 ## Installation
 ```bash
-pip3 install git+https://github.com/orionvm/potsdb.git
+pip3 install git+https://github.com/scarchik/opentsdb-py.git
 ```
 
 ## Usage
