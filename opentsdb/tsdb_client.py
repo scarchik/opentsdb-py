@@ -64,6 +64,7 @@ class TSDBClient:
         return self._metrics_queue.qsize()
 
     def send(self, name: str, value, **tags) -> str:
+        tags.update(self.static_tags)
         if self.host_tag is True and 'host' not in tags:
             tags['host'] = socket.gethostname()
 
