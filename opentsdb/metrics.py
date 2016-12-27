@@ -114,7 +114,7 @@ class Gauge(Metric):
 
     @send_metric
     def set(self, value: float):
-        self._value.inc(float(value))
+        self._value.set(float(value))
 
     @send_metric
     def timeit(self, timer=time.perf_counter):

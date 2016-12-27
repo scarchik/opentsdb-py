@@ -16,7 +16,7 @@ tsdb.USERS_COUNT = Counter('users.count', ['group'])
 tsdb.ACTIVE_USERS = Gauge('users.active')
 
 tsdb.USERS_COUNT.tags('guest').inc()
-tsdb.USERS_COUNT.tags('guest').inc()
+tsdb.USERS_COUNT.tags('admin').inc()
 tsdb.USERS_COUNT.tags('guest').inc(14)
 
 tsdb.ACTIVE_USERS.inc()
