@@ -6,10 +6,10 @@ import queue
 import time
 from os import environ
 
-from .exceptions import MetricDuplicated, ValidationError
-from .tsdb_connect import TSDBConnect
-from .push_thread import PushThread
-from .metrics import Metric
+from opentsdb.exceptions import MetricDuplicated, ValidationError
+from opentsdb.tsdb_connect import TSDBConnect
+from opentsdb.push_thread import PushThread
+from opentsdb.metrics import Metric
 
 logger = logging.getLogger('opentsdb-py')
 
@@ -99,7 +99,6 @@ class TSDBClient:
 
     def _push_metric_to_queue(self, metric_str):
         try:
-            logger.debug("Send metric: %s", metric_str)
             self._metrics_queue.put(metric_str, False)
         except queue.Full:
             logger.warning("Drop oldest metric because Queue is full.")

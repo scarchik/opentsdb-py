@@ -20,7 +20,7 @@ class PushThread(threading.Thread):
         self.retry_send_metric = None
 
     def run(self):
-        while self._is_done():
+        while not self._is_done():
             start_time = time.time()
 
             try:
@@ -28,13 +28,12 @@ class PushThread(threading.Thread):
             except Empty:
                 continue
 
-            if self.test_mode is True:
-                logger.debug("Send metric: %s", metric)
-            else:
+            logger.debug("Send metric: %s", metric)
+            if not self.test_mode:
                 try:
                     self.tsdb_connect.sendall(metric.encode('utf-8'))
                 except Exception as error:
-                    logger.error("Push metric failed: %s" % error)
+                    logger.error("Push metric failed: %s", error)
                     self.retry_send_metric = metric
                     time.sleep(1)
                     continue

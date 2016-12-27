@@ -3,7 +3,7 @@ from functools import wraps
 from logging import getLogger
 import time
 
-from .exceptions import TagsError
+from opentsdb.exceptions import TagsError
 
 logger = getLogger('opentsdb-py')
 
