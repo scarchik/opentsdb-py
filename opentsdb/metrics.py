@@ -31,7 +31,7 @@ def send_metric(func):
 
 class Metric:
 
-    def __init__(self, name: str, tag_names=(), client=None, optional_tags=True):
+    def __init__(self, name: str, tag_names=(), client=None, optional_tags=False):
         self.name = name
 
         self.tag_names = tag_names
