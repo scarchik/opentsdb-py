@@ -3,6 +3,11 @@ Python client for OpenTSDB
 
 ## Installation
 
+Install
+```bash
+pip3 install opentsdb-py
+```
+
 Install latest version from Git:
 ```bash
 pip3 install git+https://github.com/scarchik/opentsdb-py.git
