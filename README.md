@@ -143,8 +143,6 @@ tsdb.wait()
 ```
 
 
-
-
 ## Exceptions
 
 ### TSDBClientException
