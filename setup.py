@@ -11,10 +11,8 @@ setup(
     packages=find_packages(),
     keywords="opentsdb, tsdb, metrics",
     url='https://github.com/scarchik/opentsdb-py',
+    download_url='https://github.com/scarchik/opentsdb-py/archive/v0.1.2.zip',
     description='Python3 client for OpenTSDB',
-    install_requires=[
-        "setuptools",
-    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -24,7 +22,9 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3 :: Only',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Programming Language :: Python :: 3 :: Only'
+    ],
+    install_requires=[
+        "setuptools",
     ]
 )
