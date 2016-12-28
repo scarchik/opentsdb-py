@@ -24,10 +24,9 @@ class TSDBClient:
 
     def __init__(self, host: str=TSDB_HOST, port: int=TSDB_PORT, check_tsdb_alive: bool=False,
                  static_tags: dict=None, host_tag: bool=True, test_mode: bool=False, raise_duplicate=True,
-                 max_queue_size: int=MAX_METRICS_QUEUE_SIZE):
+                 max_queue_size: int=MAX_METRICS_QUEUE_SIZE, send_metrics_limit: int=SEND_METRICS_PER_SECOND_LIMIT):
         self.host_tag = host_tag
         self.static_tags = static_tags or {}
-        self.test_mode = test_mode
         self.raise_duplicate = raise_duplicate
 
         self._tsdb_connect = TSDBConnect(host, port, check_tsdb_alive)
@@ -36,7 +35,8 @@ class TSDBClient:
         self._last_metric = None
         self._metrics_queue = queue.Queue(maxsize=max_queue_size)
 
-        self._metric_send_thread = PushThread(self._tsdb_connect, self._metrics_queue, self._close_client, test_mode)
+        self._metric_send_thread = PushThread(
+            self._tsdb_connect, self._metrics_queue, self._close_client, send_metrics_limit, test_mode)
         self._metric_send_thread.daemon = True
         self._metric_send_thread.start()
 

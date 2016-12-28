@@ -8,13 +8,13 @@ logger = getLogger('opentsdb-py')
 
 
 class PushThread(threading.Thread):
-    SEND_METRICS_PER_SECOND_LIMIT = 1000
 
-    def __init__(self, tsdb_connect, metrics_queue, close_client, test_mode):
+    def __init__(self, tsdb_connect, metrics_queue, close_client, send_metrics_limit, test_mode):
         super().__init__()
         self.tsdb_connect = tsdb_connect
         self.metrics_queue = metrics_queue
         self.close_client_flag = close_client
+        self.send_metrics_limit = send_metrics_limit
         self.test_mode = test_mode
 
         self.retry_send_metric = None
@@ -56,8 +56,8 @@ class PushThread(threading.Thread):
 
     def __metrics_limit_timeout(self, start_time):
         duration = time.time() - start_time
-        if self.SEND_METRICS_PER_SECOND_LIMIT > 0:
-            wait_time = (2.0 * random.random()) / self.SEND_METRICS_PER_SECOND_LIMIT
+        if self.send_metrics_limit > 0:
+            wait_time = (2.0 * random.random()) / self.send_metrics_limit
             if wait_time > duration:
                 logger.debug("Wait for %s", wait_time - duration)
                 time.sleep(wait_time - duration)
