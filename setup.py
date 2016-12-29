@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     keywords="opentsdb, tsdb, metrics",
     url='https://github.com/scarchik/opentsdb-py',
-    download_url='https://github.com/scarchik/opentsdb-py/archive/v0.1.2.zip',
+    download_url='https://github.com/scarchik/opentsdb-py/archive/v{VERSION}.zip'.format(VERSION=__version__),
     description='Python3 client for OpenTSDB',
     classifiers=[
         'Development Status :: 4 - Beta',
