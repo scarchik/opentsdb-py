@@ -40,6 +40,9 @@ class TSDBClient:
         self._metric_send_thread.daemon = True
         self._metric_send_thread.start()
 
+    def __getattr__(self, item):
+        return getattr(self, item)
+
     def __setattr__(self, key, value):
         if isinstance(value, Metric):
             if value.client is None:
