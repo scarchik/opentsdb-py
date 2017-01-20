@@ -33,7 +33,7 @@ class PushThread(threading.Thread):
                 try:
                     self.tsdb_connect.sendall(metric.encode('utf-8'))
                 except Exception as error:
-                    logger.error("Push metric failed: %s", error)
+                    logger.exception("Push metric failed: %s", error)
                     self.retry_send_metric = metric
                     time.sleep(1)
                     continue

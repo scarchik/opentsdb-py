@@ -22,21 +22,32 @@ class TSDBClient:
     SEND_METRICS_PER_SECOND_LIMIT = 1000
     VALID_METRICS_CHARS = set(string.ascii_letters + string.digits + '-_./')
 
-    def __init__(self, host: str=TSDB_HOST, port: int=TSDB_PORT, check_tsdb_alive: bool=False,
+    def __init__(self, host: str=TSDB_HOST, port: int=TSDB_PORT, check_tsdb_alive: bool=False, run_at_once: bool=True,
                  static_tags: dict=None, host_tag: bool=True, test_mode: bool=False, raise_duplicate=True,
                  max_queue_size: int=MAX_METRICS_QUEUE_SIZE, send_metrics_limit: int=SEND_METRICS_PER_SECOND_LIMIT):
         self.host_tag = host_tag
+        self.check_tsdb_alive = check_tsdb_alive
         self.static_tags = static_tags or {}
         self.raise_duplicate = raise_duplicate
+        self.send_metrics_limit = send_metrics_limit
+        self.test_mode = test_mode
 
-        self._tsdb_connect = TSDBConnect(host, port, check_tsdb_alive)
+        self._tsdb_connect = None
         self._close_client = threading.Event()
 
         self._last_metric = None
         self._metrics_queue = queue.Queue(maxsize=max_queue_size)
 
+        self._metric_send_thread = None
+
+        if run_at_once is True:
+            self.init_client(host, port)
+
+    def init_client(self, host, port: int=TSDB_PORT):
+        self._tsdb_connect = TSDBConnect(host, port, self.check_tsdb_alive)
+
         self._metric_send_thread = PushThread(
-            self._tsdb_connect, self._metrics_queue, self._close_client, send_metrics_limit, test_mode)
+            self._tsdb_connect, self._metrics_queue, self._close_client, self.send_metrics_limit, self.test_mode)
         self._metric_send_thread.daemon = True
         self._metric_send_thread.start()
 

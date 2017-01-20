@@ -46,7 +46,7 @@ class TSDBConnect:
         attempt = 0
         while not self.stopped.is_set():
             try:
-                self._connect.connect((self.tsdb_host, self.tsdb_port))
+                self._connect.connect((self.tsdb_host, int(self.tsdb_port)))
                 return
             except (ConnectionRefusedError, socket.timeout):
                 time.sleep(min(15, 2 ** attempt))

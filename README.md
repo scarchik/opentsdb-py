@@ -77,6 +77,7 @@ tsdb.wait()
  * **host** - default: environ.get('OPEN_TSDB_HOST', '127.0.0.1')
  * **port** - default: environ.get('OPEN_TSDB_PORT', 4242)
  * **check_tsdb_alive** - (default: False) on start client will check is OpenTSDB alive and if not raise exception. 
+ * **run_at_once** - (default: True) init connection to TSDB and start push thread with TSDBClient call. 
  * **static_tags** - (default: None) specify tags which will add for each metric.
  * **host_tag** - (default: True) add tag host to metric
  * **raise_duplicate** - (default: True) raise MetricDuplicated exception when metric duplicated
