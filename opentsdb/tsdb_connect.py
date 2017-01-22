@@ -10,7 +10,7 @@ class TSDBConnect:
 
     def __init__(self, host: str, port: int, check_tsdb_alive: bool=False):
         self.tsdb_host = host
-        self.tsdb_port = port
+        self.tsdb_port = int(port)
 
         if check_tsdb_alive:
             self.is_alive(raise_error=True)
@@ -46,7 +46,7 @@ class TSDBConnect:
         attempt = 0
         while not self.stopped.is_set():
             try:
-                self._connect.connect((self.tsdb_host, int(self.tsdb_port)))
+                self._connect.connect((self.tsdb_host, self.tsdb_port))
                 return
             except (ConnectionRefusedError, socket.timeout):
                 time.sleep(min(15, 2 ** attempt))
