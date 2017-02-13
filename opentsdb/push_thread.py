@@ -36,6 +36,7 @@ class PushThread(threading.Thread):
                     self.tsdb_connect.sendall(metric.encode('utf-8'))
                 except TSDBConnectionError:
                     self.retry_send_metric = metric
+                    time.sleep(0.5)
                 except Exception as error:
                     logger.exception("Push metric failed: %s", error)
                     self.retry_send_metric = metric
@@ -48,12 +49,12 @@ class PushThread(threading.Thread):
     def _is_done(self):
         return self.tsdb_connect.stopped.is_set() or (self.close_client_flag.is_set() and self.metrics_queue.empty())
 
-    def _next_metric(self):
+    def _next_metric(self, wait_timeout=3):
         if self.retry_send_metric:
             metric = self.retry_send_metric
             self.retry_send_metric = None
         else:
-            metric = self.metrics_queue.get(block=True, timeout=3)
+            metric = self.metrics_queue.get(block=True, timeout=wait_timeout)
 
         return metric
 
