@@ -3,6 +3,8 @@ import logging
 import socket
 import time
 
+from opentsdb.exceptions import TSDBConnectionError
+
 logger = logging.getLogger('opentsdb-py')
 
 
@@ -62,6 +64,7 @@ class TSDBConnect:
     def sendall(self, line: bytes):
         try:
             self.connect.sendall(line)
-        except (BrokenPipeError, IOError, OSError) as error:
-            logger.error("Close connection to handle exception: %s", error)
+        except (BrokenPipeError, IOError, OSError, socket.error) as error:
+            logger.exception("Close connection to handle exception: %s", error)
             self._connect.close()
+            raise TSDBConnectionError(str(error))
