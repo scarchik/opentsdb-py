@@ -62,6 +62,6 @@ class TSDBConnect:
     def sendall(self, line: bytes):
         try:
             self.connect.sendall(line)
-        except (BrokenPipeError, IOError) as error:
+        except (BrokenPipeError, IOError, OSError) as error:
             logger.error("Close connection to handle exception: %s", error)
             self._connect.close()
