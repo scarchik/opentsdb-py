@@ -4,8 +4,6 @@ import threading
 import random
 import time
 
-from opentsdb.exceptions import TSDBConnectionError
-
 logger = getLogger('opentsdb-py')
 
 
@@ -34,13 +32,11 @@ class PushThread(threading.Thread):
             if not self.test_mode:
                 try:
                     self.tsdb_connect.sendall(metric.encode('utf-8'))
-                except TSDBConnectionError:
-                    self.retry_send_metric = metric
-                    time.sleep(0.5)
                 except Exception as error:
                     logger.exception("Push metric failed: %s", error)
                     self.retry_send_metric = metric
                     time.sleep(1)
+                    continue
 
             self.__metrics_limit_timeout(start_time)
 
