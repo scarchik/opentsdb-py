@@ -43,11 +43,11 @@ class TSDBConnect:
         return self._connect
 
     def _make_connection(self, timeout=2):
-        self._connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._connect.settimeout(timeout)
         attempt = 0
         while not self.stopped.is_set():
             try:
+                self._connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._connect.settimeout(timeout)
                 self._connect.connect((self.tsdb_host, self.tsdb_port))
                 return
             except (ConnectionRefusedError, socket.timeout):
