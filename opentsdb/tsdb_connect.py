@@ -59,9 +59,9 @@ class TSDBConnect:
             self._connect.close()
         self._connect = None
 
-    def sendall(self, line: bytes):
+    def sendall(self, metric: bytes):
         try:
-            self.connect.sendall(line)
+            self.connect.sendall(metric)
         except Exception:
             self._connect.close()
             raise

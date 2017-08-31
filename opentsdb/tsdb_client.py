@@ -32,7 +32,7 @@ class TSDBClient:
         self.send_metrics_limit = send_metrics_limit
         self.test_mode = test_mode
 
-        self._tsdb_connect = None
+        self._tsdb_connect = None  # type: TSDBConnect
         self._close_client = threading.Event()
 
         self._last_metric = None
@@ -64,15 +64,15 @@ class TSDBClient:
     def is_connected(self) -> bool:
         return self._tsdb_connect.is_alive()
 
-    def close(self):
+    def close(self, force=False):
         self._close_client.set()
+        self._metrics_queue.put(StopIteration)
+        if force:
+            self._tsdb_connect.stopped.set()
 
     def wait(self):
         while self._metric_send_thread.is_alive():
             time.sleep(0.05)
-
-    def stop(self):
-        self._tsdb_connect.stopped.set()
 
     def queue_size(self) -> int:
         return self._metrics_queue.qsize()

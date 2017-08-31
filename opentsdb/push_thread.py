@@ -25,6 +25,8 @@ class PushThread(threading.Thread):
 
             try:
                 metric = self._next_metric()
+            except StopIteration:
+                break
             except Empty:
                 continue
 
@@ -52,6 +54,8 @@ class PushThread(threading.Thread):
         else:
             metric = self.metrics_queue.get(block=True, timeout=wait_timeout)
 
+        if metric is StopIteration:
+            raise metric
         return metric
 
     def __metrics_limit_timeout(self, start_time):
