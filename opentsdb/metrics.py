@@ -23,8 +23,8 @@ def send_metric(func):
                 validate_tags(len(tags), self.tag_names_length, self.optional_tags)
                 self.client.send(self.name, self._value.get(), **tags)
                 return result
-            except ValueError:
-                pass
+            except ValueError as error:
+                logger.error(error)
 
     return wrapper
 

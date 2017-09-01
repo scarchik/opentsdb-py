@@ -1,22 +1,13 @@
-import threading
 import logging
 import socket
 import time
 
+from opentsdb.protocols.tsdb_connect import TSDBConnect
+
 logger = logging.getLogger('opentsdb-py')
 
 
-class TSDBConnect:
-
-    def __init__(self, host: str, port: int, check_tsdb_alive: bool=False):
-        self.tsdb_host = host
-        self.tsdb_port = int(port)
-
-        if check_tsdb_alive:
-            self.is_alive(raise_error=True)
-
-        self._connect = None
-        self.stopped = threading.Event()
+class TelnetTSDBConnect(TSDBConnect):
 
     def is_alive(self, timeout=3, raise_error=False) -> bool:
         try:
@@ -25,7 +16,7 @@ class TSDBConnect:
             sock.connect((self.tsdb_host, self.tsdb_port))
             sock.close()
         except (ConnectionRefusedError, socket.timeout):
-            if raise_error is True:
+            if raise_error:
                 raise
             return False
         else:
@@ -52,16 +43,12 @@ class TSDBConnect:
                 time.sleep(min(15, 2 ** attempt))
                 attempt += 1
 
-    def disconnect(self):
-        logger.debug("Disconnecting from %s:%s", self.tsdb_host, self.tsdb_port)
-        self.stopped.set()
-        if self._connect:
-            self._connect.close()
-        self._connect = None
-
-    def sendall(self, metric: bytes):
+    def sendall(self, metric: dict):
         try:
-            self.connect.sendall(metric)
+            tags_string = ' '.join(['%s=%s' % (key, value) for key, value in metric['tags'].items()])
+            metric_str = "put %s %d %s %s\n" % (metric['metric'], metric['timestamp'], metric['value'], tags_string)
+            logger.debug("Send metric: %s", metric_str)
+            self.connect.sendall(metric_str.encode('utf-8'))
         except Exception:
             self._connect.close()
             raise

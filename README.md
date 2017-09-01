@@ -1,5 +1,10 @@
 # opentsdb-py
 Python client for OpenTSDB
+* Support sending metrics through REST API
+* Support sending metrics through Socket 
+* Support basic typed metrics: Counter, Gauge
+* Docker ready
+* Support Nameko framework: https://github.com/fraglab/nameko-opentsdb-py
 
 ## Installation
 
@@ -66,7 +71,7 @@ from opentsdb import TSDBClient
 
 tsdb = TSDBClient('opentsdb.address', static_tags={'node': 'ua.node.12'})
 
-tsdb.send('metric.test', 1, tag1=val1, tag2=val2)
+tsdb.send('metric.test', 1, tag1='val1', tag2='val2')
 
 tsdb.close()
 tsdb.wait()
@@ -76,6 +81,7 @@ tsdb.wait()
 ## TSDBClient arguments
  * **host** - default: environ.get('OPEN_TSDB_HOST', '127.0.0.1')
  * **port** - default: environ.get('OPEN_TSDB_PORT', 4242)
+ * **protocol** - (default: HTTP) switch TSDB connection type between HTTP (REST API) or TELNET (SOCKET CONNECTION). 
  * **check_tsdb_alive** - (default: False) on start client will check is OpenTSDB alive and if not raise exception. 
  * **run_at_once** - (default: True) init connection to TSDB and start push thread with TSDBClient call. 
  * **static_tags** - (default: None) specify tags which will add for each metric.
@@ -83,7 +89,9 @@ tsdb.wait()
  * **raise_duplicate** - (default: True) raise MetricDuplicated exception when metric duplicated
  * **test_mode** - (default: False) don't send metric to OpenTSDB server
  * **max_queue_size** - (default: 10000) max size of queue for metrics
- * **send_metrics_limit** - (default: 1000) send metrics per second limit
+ * **send_metrics_limit** - (default: 1000) send metrics per second limit. **TELNET ONLY**
+ * **send_metrics_batch_limit** - (default: 50) set max batch size. **HTTP ONLY**
+ * **http_compression** - (default: gzip) set compression for sending metrics. Set to None to disable. **HTTP ONLY**
 
 ## Instruments
 
@@ -162,3 +170,5 @@ Raise when metric not valid
     * metric value type incorrect, valid only: str, int, float
     * tags not specified, at least one tag is required
 
+### UnknownTSDBConnectProtocol
+Raise when set unknown protocol
