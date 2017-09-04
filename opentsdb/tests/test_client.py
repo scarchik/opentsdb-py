@@ -34,7 +34,7 @@ def test_check_tsdb_alive():
 
 def test_http_client_close(http_client: TSDBClient):
     start = time.time()
-    assert http_client.is_connected() is True
+    assert http_client.is_connected()
     http_client.close()
     http_client.wait()
     assert http_client.is_connected() is False
@@ -43,7 +43,7 @@ def test_http_client_close(http_client: TSDBClient):
 
 def test_telnet_client_close(telnet_client: TSDBClient):
     start = time.time()
-    assert telnet_client.is_connected() is True
+    assert telnet_client.is_connected()
     telnet_client.close()
     telnet_client.wait()
     assert telnet_client.is_connected() is False
