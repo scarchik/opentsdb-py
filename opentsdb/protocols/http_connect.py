@@ -5,6 +5,7 @@ import gzip
 from requests import Session
 
 from opentsdb.protocols.tsdb_connect import TSDBConnect
+from opentsdb.exceptions import TSDBNotAlive
 
 logger = logging.getLogger('opentsdb-py')
 
@@ -35,7 +36,7 @@ class HttpTSDBConnect(TSDBConnect):
             return True
         except Exception as error:
             if raise_error:
-                raise error
+                raise TSDBNotAlive(str(error))
             return False
 
     @property

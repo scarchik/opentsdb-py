@@ -81,6 +81,9 @@ class TSDBClient:
         super(TSDBClient, self).__setattr__(key, value)
 
     def is_connected(self) -> bool:
+        return self._metric_send_thread.is_alive()
+
+    def is_alive(self) -> bool:
         return self._tsdb_connect.is_alive()
 
     def close(self, force=False):
@@ -90,13 +93,13 @@ class TSDBClient:
             self._tsdb_connect.stopped.set()
 
     def wait(self):
-        while self._metric_send_thread.is_alive():
+        while self.is_connected():
             time.sleep(0.05)
 
     def queue_size(self) -> int:
         return self._metrics_queue.qsize()
 
-    def send(self, name: str, value, **tags):
+    def send(self, name: str, value, **tags) -> dict:
         tags.update(self.static_tags)
         if self.host_tag is True and 'host' not in tags:
             tags['host'] = socket.gethostname()
@@ -109,6 +112,8 @@ class TSDBClient:
         self._check_duplicate(metric)
         if not self._close_client.is_set():
             self._push_metric_to_queue(metric)
+
+        return metric
 
     def _validate_metric(self, name, value, tags):
         try:

@@ -157,6 +157,9 @@ tsdb.wait()
 ### TSDBClientException
 opentsdb-py global exception
 
+### TSDBNotAlive
+Raise when OpenTSDB is not alive
+
 ### TagsError
 Raise when tags not specified or specified more than provide
 

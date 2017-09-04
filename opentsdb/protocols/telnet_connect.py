@@ -3,6 +3,7 @@ import socket
 import time
 
 from opentsdb.protocols.tsdb_connect import TSDBConnect
+from opentsdb.exceptions import TSDBNotAlive
 
 logger = logging.getLogger('opentsdb-py')
 
@@ -15,9 +16,9 @@ class TelnetTSDBConnect(TSDBConnect):
             sock.settimeout(timeout)
             sock.connect((self.tsdb_host, self.tsdb_port))
             sock.close()
-        except (ConnectionRefusedError, socket.timeout):
+        except (ConnectionRefusedError, socket.timeout) as error:
             if raise_error:
-                raise
+                raise TSDBNotAlive(str(error))
             return False
         else:
             return True

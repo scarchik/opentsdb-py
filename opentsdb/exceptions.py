@@ -4,6 +4,10 @@ class TSDBClientException(Exception):
     pass
 
 
+class TSDBNotAlive(TSDBClientException):
+    pass
+
+
 class TagsError(TSDBClientException):
     pass
 
