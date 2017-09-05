@@ -86,13 +86,14 @@ tsdb.wait()
  * **run_at_once** - (default: True) init connection to TSDB and start push thread with TSDBClient call. 
  * **static_tags** - (default: None) specify tags which will add for each metric.
  * **host_tag** - (default: True) add tag host to metric
- * **test_mode** - (default: False) don't send metric to OpenTSDB server
  * **max_queue_size** - (default: 10000) max size of queue for metrics
  * **send_metrics_limit** - (default: 1000) send metrics per second limit. **TELNET ONLY**
  * **send_metrics_batch_limit** - (default: 50) set max batch size. **HTTP ONLY**
  * **http_compression** - (default: gzip) set compression for sending metrics. Set to None to disable. **HTTP ONLY**
 
+## DEPRECATED TSDBClient arguments
  * **raise_duplicate** - (default: True) raise MetricDuplicated exception when metric duplicated **DEPRECATED in 0.4.0**
+ * **test_mode** - (default: False) don't send metric to OpenTSDB server **DEPRECATED in 0.4.1**
 
 ## Instruments
 

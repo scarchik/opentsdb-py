@@ -12,14 +12,14 @@ class PushThread(threading.Thread):
     WAIT_NEXT_METRIC_TIMEOUT = 3
 
     def __init__(self, tsdb_connect, metrics_queue, close_client,
-                 send_metrics_limit, send_metrics_batch_limit, test_mode):
+                 send_metrics_limit, send_metrics_batch_limit, statuses):
         super().__init__()
         self.tsdb_connect = tsdb_connect
         self.metrics_queue = metrics_queue
         self.close_client_flag = close_client
         self.send_metrics_limit = send_metrics_limit
         self.send_metrics_batch_limit = send_metrics_batch_limit
-        self.test_mode = test_mode
+        self.statuses = statuses
 
         self._retry_send_metrics = None
 
@@ -33,13 +33,14 @@ class PushThread(threading.Thread):
                     self._retry_send_metrics = None
                 else:
                     data = self._next(self.WAIT_NEXT_METRIC_TIMEOUT)
+
+                self.send(data)
             except StopIteration:
                 break
             except Empty:
                 continue
-
-            if not self.test_mode:
-                self.send(data)
+            except Exception as error:
+                logger.exception(error)
 
             if self.send_metrics_limit > 0:
                 self.__metrics_limit_timeout(start_time)
@@ -57,6 +58,10 @@ class PushThread(threading.Thread):
 
     def __metrics_limit_timeout(self, start_time):
         pass
+
+    def _update_statuses(self, success, failed):
+        self.statuses['success'] += success
+        self.statuses['failed'] += failed
 
 
 class HTTPPushThread(PushThread):
@@ -86,10 +91,11 @@ class HTTPPushThread(PushThread):
             self._retry_send_metrics = data
             time.sleep(1)
         else:
-            if result.get('failed') > 0:
-                logger.warning(
-                    "Push metric from batch failed %d/%d." % result.get('failed'), len(data),
-                    extra=result.get('errors'))
+            failed = result.get('failed', 0)
+            self._update_statuses(result.get('success', 0), failed)
+            if failed:
+                logger.warning("Push metrics are failed %d/%d" % (failed, len(data)),
+                               extra={'errors': result.get('errors')})
 
 
 class TelnetPushThread(PushThread):
@@ -115,3 +121,5 @@ class TelnetPushThread(PushThread):
             logger.exception("Push metric failed: %s", error)
             self._retry_send_metrics = data
             time.sleep(1)
+        else:
+            self._update_statuses(1, 0)

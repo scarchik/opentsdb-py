@@ -17,14 +17,14 @@ def tsdb_port():
 
 @pytest.fixture
 def http_client(tsdb_host, tsdb_port):
-    return TSDBClient(tsdb_host, tsdb_port, host_tag=False, test_mode=True)
+    return TSDBClient(tsdb_host, tsdb_port, host_tag=False)
 
 
 @pytest.fixture
 def http_client2(tsdb_host, tsdb_port):
-    return TSDBClient(tsdb_host, tsdb_port, host_tag=True, test_mode=True)
+    return TSDBClient(tsdb_host, tsdb_port, host_tag=True)
 
 
 @pytest.fixture
 def telnet_client(tsdb_host, tsdb_port):
-    return TSDBClient(tsdb_host, tsdb_port, protocol=TSDBConnectProtocols.TELNET, host_tag=True, test_mode=True)
+    return TSDBClient(tsdb_host, tsdb_port, protocol=TSDBConnectProtocols.TELNET, host_tag=True)

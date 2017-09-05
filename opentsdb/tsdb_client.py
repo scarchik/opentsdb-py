@@ -31,7 +31,6 @@ class TSDBClient:
                  run_at_once: bool=True,
                  static_tags: dict=None,
                  host_tag: bool=True,
-                 test_mode: bool=False,
                  max_queue_size: int=TSDB_MAX_METRICS_QUEUE_SIZE,
                  http_compression: str=TSDB_DEFAULT_HTTP_COMPRESSION,
                  send_metrics_limit: int=TSDB_SEND_METRICS_PER_SECOND_LIMIT,
@@ -43,13 +42,12 @@ class TSDBClient:
         self.static_tags = static_tags or {}
         self.send_metrics_limit = send_metrics_limit if protocol == TSDBConnectProtocols.TELNET else 0
         self.send_metrics_batch_limit = send_metrics_batch_limit if protocol == TSDBConnectProtocols.HTTP else 0
-        self.test_mode = test_mode
         self.http_compression = http_compression
 
         self._tsdb_connect = None
         self._close_client = threading.Event()
-
         self._metrics_queue = queue.Queue(maxsize=max_queue_size)
+        self.statuses = {'success': 0, 'failed': 0, 'queued': 0}
 
         self._metric_send_thread = None
 
@@ -62,7 +60,7 @@ class TSDBClient:
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
             self.protocol, self._tsdb_connect, self._metrics_queue, self._close_client,
-            self.send_metrics_limit, self.send_metrics_batch_limit, self.test_mode)
+            self.send_metrics_limit, self.send_metrics_batch_limit, self.statuses)
         self._metric_send_thread.daemon = True
         self._metric_send_thread.start()
 
@@ -85,7 +83,7 @@ class TSDBClient:
     def close(self, force=False):
         self._close_client.set()
         self._metrics_queue.put(StopIteration)
-        if force:
+        if force and self._tsdb_connect:
             self._tsdb_connect.stopped.set()
 
     def wait(self):
@@ -125,5 +123,8 @@ class TSDBClient:
             self._metrics_queue.get()
             self._metrics_queue.put(metric, False)
 
+        self.statuses['queued'] += 1
+
     def __del__(self):
-        self.close(force=True)
+        if not self._close_client.is_set():
+            self.close(force=True)

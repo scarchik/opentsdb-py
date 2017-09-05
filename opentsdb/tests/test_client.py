@@ -28,8 +28,9 @@ def test_host_tag(telnet_client: TSDBClient):
 
 
 def test_check_tsdb_alive():
-    pytest.raises(TSDBNotAlive,
-                  TSDBClient, '127.0.0.2', 42424, protocol=TSDBConnectProtocols.TELNET, check_tsdb_alive=True)
+    pytest.raises(
+        TSDBNotAlive,
+        TSDBClient, '127.0.0.2', 42424, protocol=TSDBConnectProtocols.TELNET, check_tsdb_alive=True)
 
 
 def test_http_client_close(http_client: TSDBClient):
@@ -51,10 +52,17 @@ def test_telnet_client_close(telnet_client: TSDBClient):
 
 
 def test_send_metric_through_http(http_client: TSDBClient):
-    http_client.send('test', 1, tag1=1)
-    assert http_client.queue_size() == 1
+    _test_sending_metric(http_client)
 
 
 def test_send_metric_through_telnet(telnet_client: TSDBClient):
-    telnet_client.send('test', 1, tag1=1)
-    assert telnet_client.queue_size() == 1
+    _test_sending_metric(telnet_client)
+
+
+def _test_sending_metric(client: TSDBClient):
+    client.send('test', 1, tag1=1)
+    assert client.queue_size() == 1
+    client.close()
+    client.wait()
+    assert client.queue_size() == 0
+    assert client.statuses['success'] == 1
