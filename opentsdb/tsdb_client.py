@@ -4,10 +4,9 @@ import socket
 import string
 import threading
 import time
-from collections import OrderedDict
 from os import environ
 
-from opentsdb.exceptions import MetricDuplicated, ValidationError
+from opentsdb.exceptions import ValidationError
 from opentsdb.metrics import Metric
 from opentsdb.protocols import TSDBConnectProtocols
 
@@ -33,7 +32,6 @@ class TSDBClient:
                  static_tags: dict=None,
                  host_tag: bool=True,
                  test_mode: bool=False,
-                 raise_duplicate=True,
                  max_queue_size: int=TSDB_MAX_METRICS_QUEUE_SIZE,
                  http_compression: str=TSDB_DEFAULT_HTTP_COMPRESSION,
                  send_metrics_limit: int=TSDB_SEND_METRICS_PER_SECOND_LIMIT,
@@ -43,7 +41,6 @@ class TSDBClient:
         self.protocol = protocol
         self.check_tsdb_alive = check_tsdb_alive
         self.static_tags = static_tags or {}
-        self.raise_duplicate = raise_duplicate
         self.send_metrics_limit = send_metrics_limit if protocol == TSDBConnectProtocols.TELNET else 0
         self.send_metrics_batch_limit = send_metrics_batch_limit if protocol == TSDBConnectProtocols.HTTP else 0
         self.test_mode = test_mode
@@ -52,7 +49,6 @@ class TSDBClient:
         self._tsdb_connect = None
         self._close_client = threading.Event()
 
-        self._last_metric = None
         self._metrics_queue = queue.Queue(maxsize=max_queue_size)
 
         self._metric_send_thread = None
@@ -105,11 +101,8 @@ class TSDBClient:
             tags['host'] = socket.gethostname()
 
         self._validate_metric(name, value, tags)
+        metric = dict(metric=name, timestamp=int(tags.pop('timestamp', time.time())), value=value, tags=tags)
 
-        timestamp = int(tags.pop('timestamp', time.time()))
-        metric = OrderedDict(metric=name, timestamp=timestamp, value=value, tags=OrderedDict(**tags))
-
-        self._check_duplicate(metric)
         if not self._close_client.is_set():
             self._push_metric_to_queue(metric)
 
@@ -123,15 +116,6 @@ class TSDBClient:
             assert tags != {}, "Need at least one tag"
         except AssertionError as error:
             raise ValidationError("Metric not valid: %s" % str(error))
-
-    def _check_duplicate(self, metric):
-        try:
-            assert metric != self._last_metric
-            self._last_metric = metric
-        except AssertionError:
-            if self.raise_duplicate:
-                raise MetricDuplicated("Duplicate metric: %s" % metric)
-            logger.warning("Duplicate metric: %s" % metric)
 
     def _push_metric_to_queue(self, metric):
         try:
