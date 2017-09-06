@@ -124,7 +124,3 @@ class TSDBClient:
             self._metrics_queue.put(metric, False)
 
         self.statuses['queued'] += 1
-
-    def __del__(self):
-        if not self._close_client.is_set():
-            self.close(force=True)
