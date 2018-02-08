@@ -66,3 +66,7 @@ def _test_sending_metric(client: TSDBClient):
     client.wait()
     assert client.queue_size() == 0
     assert client.statuses['success'] == 1
+
+
+def test_predefined_metrics(http_client3: TSDBClient):
+    assert http_client3.PREDEFINED_METRIC.client is not None

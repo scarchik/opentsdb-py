@@ -2,7 +2,7 @@ from os import environ
 
 import pytest
 
-from opentsdb import TSDBClient, TSDBConnectProtocols
+from opentsdb import TSDBClient, TSDBConnectProtocols, Counter
 
 
 @pytest.fixture
@@ -23,6 +23,15 @@ def http_client(tsdb_host, tsdb_port):
 @pytest.fixture
 def http_client2(tsdb_host, tsdb_port):
     return TSDBClient(tsdb_host, tsdb_port, host_tag=True)
+
+
+class Metrics(TSDBClient):
+    PREDEFINED_METRIC = Counter('test.predefined.metric')
+
+
+@pytest.fixture
+def http_client3(tsdb_host, tsdb_port):
+    return Metrics(tsdb_host, tsdb_port, host_tag=True)
 
 
 @pytest.fixture

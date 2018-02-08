@@ -64,6 +64,13 @@ class TSDBClient:
         self._metric_send_thread.daemon = True
         self._metric_send_thread.start()
 
+        self._load_predefined_metrics()
+
+    def _load_predefined_metrics(self):
+        for key, value in self.__class__.__dict__.items():
+            if isinstance(value, Metric):
+                self.__setattr__(key, value)
+
     def __getattr__(self, item):
         return getattr(self, item)
 
