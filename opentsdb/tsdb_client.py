@@ -71,9 +71,6 @@ class TSDBClient:
             if isinstance(value, Metric):
                 self.__setattr__(key, value)
 
-    def __getattr__(self, item):
-        return getattr(self, item)
-
     def __setattr__(self, key, value):
         if isinstance(value, Metric):
             if value.client is None:
