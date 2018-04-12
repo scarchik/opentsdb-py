@@ -10,11 +10,11 @@ class TSDBConnect:
         self.tsdb_host = host
         self.tsdb_port = int(port)
         self.compression = compression
+        self._connect = None
 
         if check_tsdb_alive:
             self.is_alive(raise_error=True)
 
-        self._connect = None
         self.stopped = threading.Event()
 
     def is_alive(self, timeout=3, raise_error=False) -> bool:
