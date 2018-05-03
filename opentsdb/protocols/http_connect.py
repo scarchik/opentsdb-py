@@ -22,8 +22,8 @@ class HttpTSDBConnect(TSDBConnect):
     SEND_TIMEOUT = 2
 
     def __init__(self, host: str, port: int, *args, **kwargs):
-        super().__init__(host, port, *args, **kwargs)
         self.tsdb_urls = TSDBUrls(host, int(port))
+        super().__init__(host, port, *args, **kwargs)
         assert self.compression in ['gzip', None], 'Unsupported HTTP compression type: %s' % self.compression
         if self.compression:
             logger.info("Compression %s is enabled", self.compression)
