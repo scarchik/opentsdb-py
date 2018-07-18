@@ -115,7 +115,6 @@ class Gauge(Metric):
     def set(self, value: float):
         self._value.set(float(value))
 
-    @send_metric
     def timeit(self, timer=time.perf_counter):
         return _GaugeTimer(self, timer)
 
@@ -132,6 +131,7 @@ class _GaugeTimer:
         self._gauge.set(max(self._timer() - self._start, 0))
 
     def __call__(self, func):
+        @wraps(func)
         def wrapped(*args, **kwargs):
             with self:
                 return func(*args, **kwargs)

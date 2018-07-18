@@ -120,15 +120,34 @@ tsdb.wait()
 Gauges can go up and down.
 
 ```python
+import time
+
 from opentsdb import TSDBClient, Gauge
 
 tsdb = TSDBClient('opentsdb.address')
 
 tsdb.ACTIVE = Gauge('metric.active')
+tsdb.ACTIVE_EXEC_TIME = Gauge('metric.active.exec_time')
 
 tsdb.ACTIVE.inc()
 tsdb.ACTIVE.dec()
 tsdb.ACTIVE.set(17)
+
+@tsdb.ACTIVE_EXEC_TIME.timeit()
+def do_some_job():
+    time.sleep(2)
+
+
+def do_more_jobs():
+    time.sleep(1)
+
+    with tsdb.ACTIVE_EXEC_TIME.timeit():
+        time.sleep(1)
+
+do_some_job()
+do_more_jobs()
+
+tsdb.close()
 tsdb.wait()
 ```
 
