@@ -10,11 +10,18 @@ from opentsdb.exceptions import TSDBNotAlive
 logger = logging.getLogger('opentsdb-py')
 
 
+VERSION_ENDPOINT = '/api/version'
+PUT_ENDPOINT = '/api/put?details=true'
+
 class TSDBUrls:
 
-    def __init__(self, host: str, port: int):
-        self.version = 'http://%s:%s/api/version' % (host, port)
-        self.put = 'http://%s:%s/api/put?details=true' % (host, port)
+    def __init__(self, host: str, port: int, protocol: str='http',
+                 endpoint_prefix=None):
+        base_url = '{}://{}:{}'.format(protocol, host, port)
+        if endpoint_prefix is not None:
+            base_url += '/{}'.format(endpoint_prefix)
+        self.version = base_url + VERSION_ENDPOINT
+        self.put = base_url + PUT_ENDPOINT
 
 
 class HttpTSDBConnect(TSDBConnect):
