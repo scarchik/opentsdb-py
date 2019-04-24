@@ -2,8 +2,8 @@
 from opentsdb.protocols.http_connect import TSDBUrls, VERSION_ENDPOINT
 
 
-def test_protocol():
-    url = TSDBUrls('127.0.0.1', 4242, protocol='https')
+def test_https_enabled():
+    url = TSDBUrls('127.0.0.1', 4242, https_enabled=True)
     assert url.version == 'https://127.0.0.1:4242' + VERSION_ENDPOINT
 
 

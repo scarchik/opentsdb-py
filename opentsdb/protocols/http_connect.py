@@ -1,6 +1,7 @@
 import logging
 import json
 import gzip
+from typing import Optional
 
 from requests import Session
 
@@ -15,9 +16,12 @@ PUT_ENDPOINT = '/api/put?details=true'
 
 class TSDBUrls:
 
-    def __init__(self, host: str, port: int, protocol: str='http',
+    def __init__(self, host: str, port: int, https_enabled: bool=False,
                  endpoint_prefix=None):
-        base_url = '{}://{}:{}'.format(protocol, host, port)
+        prefix = 'http'
+        if https_enabled:
+            prefix += 's'
+        base_url = '{}://{}:{}'.format(prefix, host, port)
         if endpoint_prefix is not None:
             base_url += '/{}'.format(endpoint_prefix)
         self.version = base_url + VERSION_ENDPOINT
@@ -28,8 +32,9 @@ class HttpTSDBConnect(TSDBConnect):
 
     SEND_TIMEOUT = 2
 
-    def __init__(self, host: str, port: int, *args, **kwargs):
-        self.tsdb_urls = TSDBUrls(host, int(port))
+    def __init__(self, host: str, port: int, https_enabled: bool,
+                 endpoint_prefix: Optional[str], *args, **kwargs):
+        self.tsdb_urls = TSDBUrls(host, int(port), https_enabled, endpoint_prefix)
         super().__init__(host, port, *args, **kwargs)
         assert self.compression in ['gzip', None], 'Unsupported HTTP compression type: %s' % self.compression
         if self.compression:

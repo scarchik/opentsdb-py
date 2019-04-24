@@ -5,6 +5,7 @@ import string
 import threading
 import time
 from os import environ
+from typing import Optional
 
 from opentsdb.exceptions import ValidationError
 from opentsdb.metrics import Metric
@@ -28,6 +29,8 @@ class TSDBClient:
                  port: int=TSDB_PORT,
                  check_tsdb_alive: bool=False,
                  protocol: str=TSDBConnectProtocols.HTTP,
+                 https_enabled: bool=False,
+                 endpoint_prefix: Optional[str]=None,
                  run_at_once: bool=True,
                  static_tags: dict=None,
                  host_tag: bool=True,
@@ -38,6 +41,8 @@ class TSDBClient:
 
         self.host_tag = host_tag
         self.protocol = protocol
+        self.https_enabled = https_enabled
+        self.endpoint_prefix = endpoint_prefix if protocol == TSDBConnectProtocols.HTTP else None
         self.check_tsdb_alive = check_tsdb_alive
         self.static_tags = static_tags or {}
         self.send_metrics_limit = send_metrics_limit if protocol == TSDBConnectProtocols.TELNET else 0
@@ -56,7 +61,9 @@ class TSDBClient:
 
     def init_client(self, host, port: int=TSDB_PORT):
         self._tsdb_connect = TSDBConnectProtocols.get_connect(
-            self.protocol, host, port, self.check_tsdb_alive, self.http_compression)
+            self.protocol, host, port, self.check_tsdb_alive, self.http_compression,
+            self.https_enabled, self.endpoint_prefix
+        )
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
             self.protocol, self._tsdb_connect, self._metrics_queue, self._close_client,
