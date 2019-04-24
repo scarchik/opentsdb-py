@@ -82,6 +82,8 @@ tsdb.wait()
  * **host** - default: environ.get('OPEN_TSDB_HOST', '127.0.0.1')
  * **port** - default: environ.get('OPEN_TSDB_PORT', 4242)
  * **protocol** - (default: HTTP) switch TSDB connection type between HTTP (REST API) or TELNET (SOCKET CONNECTION). 
+ * **https_enabled** - (default: False) use https instead of http when using HTTP protocol. **HTTP ONLY**
+ * **endpoint_prefix** - (default: None) optional prefix to the HTTP endpoints (resulting in e.g., 'http://127.0.0.1:4242/opentsdb_prefix'). **HTTP ONLY**
  * **check_tsdb_alive** - (default: False) on start client will check is OpenTSDB alive and if not raise exception. 
  * **run_at_once** - (default: True) init connection to TSDB and start push thread with TSDBClient call. 
  * **static_tags** - (default: None) specify tags which will add for each metric.
