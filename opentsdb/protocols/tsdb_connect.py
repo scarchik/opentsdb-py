@@ -6,11 +6,9 @@ logger = logging.getLogger('opentsdb-py')
 
 class TSDBConnect:
 
-    def __init__(self, host: str, port: int, check_tsdb_alive: bool=False,
-                 compression: str=None, *args, **kwargs):
+    def __init__(self, host: str, port: int, check_tsdb_alive: bool=False, *args, **kwargs):
         self.tsdb_host = host
         self.tsdb_port = int(port)
-        self.compression = compression
         self._connect = None
 
         if check_tsdb_alive:

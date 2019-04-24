@@ -61,8 +61,9 @@ class TSDBClient:
 
     def init_client(self, host, port: int=TSDB_PORT):
         self._tsdb_connect = TSDBConnectProtocols.get_connect(
-            self.protocol, host, port, self.check_tsdb_alive, self.http_compression,
-            self.https_enabled, self.endpoint_prefix
+            self.protocol, host, port, self.check_tsdb_alive,
+            compression=self.http_compression, https_enabled=self.https_enabled,
+            endpoint_prefix=self.endpoint_prefix
         )
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
