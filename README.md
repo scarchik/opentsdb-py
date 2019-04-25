@@ -81,6 +81,7 @@ tsdb.wait()
 ## TSDBClient arguments
  * **host** - default: environ.get('OPEN_TSDB_HOST', '127.0.0.1')
  * **port** - default: environ.get('OPEN_TSDB_PORT', 4242)
+ * **uri** - default: environ.get('OPEN_TSDB_URI') alternative for host & port, useful for custom URIs. Host & port will be ignored if specified.
  * **protocol** - (default: HTTP) switch TSDB connection type between HTTP (REST API) or TELNET (SOCKET CONNECTION). 
  * **check_tsdb_alive** - (default: False) on start client will check is OpenTSDB alive and if not raise exception. 
  * **run_at_once** - (default: True) init connection to TSDB and start push thread with TSDBClient call. 

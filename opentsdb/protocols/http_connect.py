@@ -1,6 +1,7 @@
 import logging
 import json
 import gzip
+from typing import Optional
 
 from requests import Session
 
@@ -11,19 +12,35 @@ logger = logging.getLogger('opentsdb-py')
 
 
 class TSDBUrls:
+    VERSION_ENDPOINT = '/api/version'
+    PUT_ENDPOINT = '/api/put?details=true'
 
-    def __init__(self, host: str, port: int):
-        self.version = 'http://%s:%s/api/version' % (host, port)
-        self.put = 'http://%s:%s/api/put?details=true' % (host, port)
+    def __init__(self, base_url):
+        self.version = base_url + self.VERSION_ENDPOINT
+        self.put = base_url + self.PUT_ENDPOINT
+
+    @classmethod
+    def from_host_and_port(cls, host, port):
+        base_url = 'http://{}:{}'.format(host, port)
+        return cls(base_url)
+
+    @classmethod
+    def from_uri(cls, uri):
+        return cls(uri)
 
 
 class HttpTSDBConnect(TSDBConnect):
 
     SEND_TIMEOUT = 2
 
-    def __init__(self, host: str, port: int, *args, **kwargs):
-        self.tsdb_urls = TSDBUrls(host, int(port))
-        super().__init__(host, port, *args, **kwargs)
+    def __init__(self, host: str, port: int, check_tsdb_alive: bool,
+                 compression: str, uri: Optional[str]):
+        if uri is None:
+            self.tsdb_urls = TSDBUrls.from_host_and_port(host, int(port))
+        else:
+            self.tsdb_urls = TSDBUrls.from_uri(uri)
+        super().__init__(host, port, check_tsdb_alive)
+        self.compression = compression
         assert self.compression in ['gzip', None], 'Unsupported HTTP compression type: %s' % self.compression
         if self.compression:
             logger.info("Compression %s is enabled", self.compression)

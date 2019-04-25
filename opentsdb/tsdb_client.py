@@ -5,6 +5,7 @@ import string
 import threading
 import time
 from os import environ
+from typing import Optional
 
 from opentsdb.exceptions import ValidationError
 from opentsdb.metrics import Metric
@@ -16,6 +17,7 @@ logger = logging.getLogger('opentsdb-py')
 class TSDBClient:
     TSDB_HOST = environ.get('OPEN_TSDB_HOST', '127.0.0.1')
     TSDB_PORT = int(environ.get('OPEN_TSDB_PORT', 4242))
+    TSDB_URI = environ.get('OPEN_TSDB_URI')
 
     TSDB_MAX_METRICS_QUEUE_SIZE = int(environ.get('TSDB_MAX_METRICS_QUEUE_SIZE', 10000))
     TSDB_SEND_METRICS_PER_SECOND_LIMIT = int(environ.get('TSDB_SEND_METRICS_PER_SECOND_LIMIT', 1000))
@@ -33,6 +35,7 @@ class TSDBClient:
                  host_tag: bool=True,
                  max_queue_size: int=TSDB_MAX_METRICS_QUEUE_SIZE,
                  http_compression: str=TSDB_DEFAULT_HTTP_COMPRESSION,
+                 uri: str=TSDB_URI,
                  send_metrics_limit: int=TSDB_SEND_METRICS_PER_SECOND_LIMIT,
                  send_metrics_batch_limit: int=TSDB_SEND_METRICS_BATCH_LIMIT):
 
@@ -52,11 +55,13 @@ class TSDBClient:
         self._metric_send_thread = None
 
         if run_at_once is True:
-            self.init_client(host, port)
+            self.init_client(host, port, uri)
 
-    def init_client(self, host, port: int=TSDB_PORT):
+    def init_client(self, host, port: int=TSDB_PORT, uri: Optional[str]=None):
         self._tsdb_connect = TSDBConnectProtocols.get_connect(
-            self.protocol, host, port, self.check_tsdb_alive, self.http_compression)
+            self.protocol, host, port, self.check_tsdb_alive,
+            compression=self.http_compression, uri=uri
+        )
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
             self.protocol, self._tsdb_connect, self._metrics_queue, self._close_client,
