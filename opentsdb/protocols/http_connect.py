@@ -11,21 +11,22 @@ from opentsdb.exceptions import TSDBNotAlive
 logger = logging.getLogger('opentsdb-py')
 
 
-VERSION_ENDPOINT = '/api/version'
-PUT_ENDPOINT = '/api/put?details=true'
-
 class TSDBUrls:
+    VERSION_ENDPOINT = '/api/version'
+    PUT_ENDPOINT = '/api/put?details=true'
 
-    def __init__(self, host: str, port: int, https_enabled: bool=False,
-                 endpoint_prefix=None):
-        prefix = 'http'
-        if https_enabled:
-            prefix += 's'
-        base_url = '{}://{}:{}'.format(prefix, host, port)
-        if endpoint_prefix is not None:
-            base_url += '/{}'.format(endpoint_prefix)
-        self.version = base_url + VERSION_ENDPOINT
-        self.put = base_url + PUT_ENDPOINT
+    def __init__(self, base_url):
+        self.version = base_url + self.VERSION_ENDPOINT
+        self.put = base_url + self.PUT_ENDPOINT
+
+    @classmethod
+    def from_host_and_port(cls, host, port):
+        base_url = 'http://{}:{}'.format(host, port)
+        return cls(base_url)
+
+    @classmethod
+    def from_uri(cls, uri):
+        return cls(uri)
 
 
 class HttpTSDBConnect(TSDBConnect):
@@ -33,9 +34,11 @@ class HttpTSDBConnect(TSDBConnect):
     SEND_TIMEOUT = 2
 
     def __init__(self, host: str, port: int, check_tsdb_alive: bool,
-                 compression: str, https_enabled: bool,
-                 endpoint_prefix: Optional[str]):
-        self.tsdb_urls = TSDBUrls(host, int(port), https_enabled, endpoint_prefix)
+                 compression: str, uri: Optional[str]):
+        if uri is None:
+            self.tsdb_urls = TSDBUrls.from_host_and_port(host, int(port))
+        else:
+            self.tsdb_urls = TSDBUrls.from_uri(uri)
         super().__init__(host, port, check_tsdb_alive)
         self.compression = compression
         assert self.compression in ['gzip', None], 'Unsupported HTTP compression type: %s' % self.compression

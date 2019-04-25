@@ -17,6 +17,7 @@ logger = logging.getLogger('opentsdb-py')
 class TSDBClient:
     TSDB_HOST = environ.get('OPEN_TSDB_HOST', '127.0.0.1')
     TSDB_PORT = int(environ.get('OPEN_TSDB_PORT', 4242))
+    TSDB_URI = environ.get('OPEN_TSDB_URI')
 
     TSDB_MAX_METRICS_QUEUE_SIZE = int(environ.get('TSDB_MAX_METRICS_QUEUE_SIZE', 10000))
     TSDB_SEND_METRICS_PER_SECOND_LIMIT = int(environ.get('TSDB_SEND_METRICS_PER_SECOND_LIMIT', 1000))
@@ -29,20 +30,17 @@ class TSDBClient:
                  port: int=TSDB_PORT,
                  check_tsdb_alive: bool=False,
                  protocol: str=TSDBConnectProtocols.HTTP,
-                 https_enabled: bool=False,
-                 endpoint_prefix: Optional[str]=None,
                  run_at_once: bool=True,
                  static_tags: dict=None,
                  host_tag: bool=True,
                  max_queue_size: int=TSDB_MAX_METRICS_QUEUE_SIZE,
                  http_compression: str=TSDB_DEFAULT_HTTP_COMPRESSION,
+                 uri: str=TSDB_URI,
                  send_metrics_limit: int=TSDB_SEND_METRICS_PER_SECOND_LIMIT,
                  send_metrics_batch_limit: int=TSDB_SEND_METRICS_BATCH_LIMIT):
 
         self.host_tag = host_tag
         self.protocol = protocol
-        self.https_enabled = https_enabled
-        self.endpoint_prefix = endpoint_prefix if protocol == TSDBConnectProtocols.HTTP else None
         self.check_tsdb_alive = check_tsdb_alive
         self.static_tags = static_tags or {}
         self.send_metrics_limit = send_metrics_limit if protocol == TSDBConnectProtocols.TELNET else 0
@@ -57,13 +55,12 @@ class TSDBClient:
         self._metric_send_thread = None
 
         if run_at_once is True:
-            self.init_client(host, port)
+            self.init_client(host, port, uri)
 
-    def init_client(self, host, port: int=TSDB_PORT):
+    def init_client(self, host, port: int=TSDB_PORT, uri: Optional[str]=None):
         self._tsdb_connect = TSDBConnectProtocols.get_connect(
             self.protocol, host, port, self.check_tsdb_alive,
-            compression=self.http_compression, https_enabled=self.https_enabled,
-            endpoint_prefix=self.endpoint_prefix
+            compression=self.http_compression, uri=uri
         )
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
