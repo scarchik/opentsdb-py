@@ -21,7 +21,7 @@ def send_metric(func):
                 func(self, *args, **kwargs)
                 tags = self.pop_tags()
                 validate_tags(len(tags), self.tag_names_length, self.optional_tags)
-                return self.client.send(self.name, self._value.get(), **tags)
+                return self.client.send(self.name, self._value.get(), self._value.get_ts(), **tags)
             except ValueError as error:
                 logger.error(error)
 
@@ -64,19 +64,26 @@ class Metric:
 class _MetricValue:
     def __init__(self):
         self._value = 0.0
+        self._timestamp = None
         self._lock = Lock()
 
     def inc(self, amount):
         with self._lock:
             self._value += amount
+            self._timestamp = None
 
-    def set(self, value):
+    def set(self, value, timestamp=None):
         with self._lock:
             self._value = value
+            self._timestamp = timestamp
 
     def get(self):
         with self._lock:
             return self._value
+
+    def get_ts(self):
+        with self._lock:
+            return self._timestamp
 
 
 class Counter(Metric):
@@ -112,8 +119,8 @@ class Gauge(Metric):
         self._value.inc(-amount)
 
     @send_metric
-    def set(self, value: float):
-        self._value.set(float(value))
+    def set(self, value: float, timestamp=None):
+        self._value.set(float(value), timestamp)
 
     def timeit(self, timer=time.perf_counter):
         return _GaugeTimer(self, timer)
