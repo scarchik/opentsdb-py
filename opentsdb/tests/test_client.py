@@ -60,7 +60,7 @@ def test_send_metric_through_telnet(telnet_client: TSDBClient):
 
 
 def _test_sending_metric(client: TSDBClient):
-    client.send('test', 1, tag1=1)
+    client.send('test', 1, None, tag1=1)
     assert client.queue_size() == 1
     client.close()
     client.wait()
