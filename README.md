@@ -22,6 +22,7 @@ pip3 install git+https://github.com/scarchik/opentsdb-py.git
 
 ```python
 import logging
+import time
 
 from opentsdb import TSDBClient, Counter, Gauge
 
@@ -39,6 +40,7 @@ tsdb.ACTIVE_USERS.inc()
 tsdb.ACTIVE_USERS.inc()
 tsdb.ACTIVE_USERS.dec()
 tsdb.ACTIVE_USERS.set(12)
+tsdb.ACTIVE_USERS.set(14, time.time())
 
 tsdb.close()
 tsdb.wait()
@@ -133,6 +135,7 @@ tsdb.ACTIVE_EXEC_TIME = Gauge('metric.active.exec_time')
 tsdb.ACTIVE.inc()
 tsdb.ACTIVE.dec()
 tsdb.ACTIVE.set(17)
+tsdb.ACTIVE.set(18, time.time())
 
 @tsdb.ACTIVE_EXEC_TIME.timeit()
 def do_some_job():
