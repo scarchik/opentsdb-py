@@ -18,6 +18,8 @@ class TSDBClient:
     TSDB_HOST = environ.get('OPEN_TSDB_HOST', '127.0.0.1')
     TSDB_PORT = int(environ.get('OPEN_TSDB_PORT', 4242))
     TSDB_URI = environ.get('OPEN_TSDB_URI')
+    TSDB_PUT_ENDPOINT = environ.get('OPEN_TSDB_PUT_ENDPOINT', '/api/put?details=true')
+    TSDB_VERSION_ENDPOINT = environ.get('OPEN_TSDB_VERSION_ENDPOINT', '/api/version')
 
     TSDB_MAX_METRICS_QUEUE_SIZE = int(environ.get('TSDB_MAX_METRICS_QUEUE_SIZE', 10000))
     TSDB_SEND_METRICS_PER_SECOND_LIMIT = int(environ.get('TSDB_SEND_METRICS_PER_SECOND_LIMIT', 1000))
@@ -25,19 +27,23 @@ class TSDBClient:
     TSDB_DEFAULT_HTTP_COMPRESSION = environ.get('TSDB_DEFAULT_HTTP_COMPRESSION', 'gzip')
     VALID_METRICS_CHARS = set(string.ascii_letters + string.digits + '-_./')
 
-    def __init__(self,
-                 host: str=TSDB_HOST,
-                 port: int=TSDB_PORT,
-                 check_tsdb_alive: bool=False,
-                 protocol: str=TSDBConnectProtocols.HTTP,
-                 run_at_once: bool=True,
-                 static_tags: dict=None,
-                 host_tag: bool=True,
-                 max_queue_size: int=TSDB_MAX_METRICS_QUEUE_SIZE,
-                 http_compression: str=TSDB_DEFAULT_HTTP_COMPRESSION,
-                 uri: str=TSDB_URI,
-                 send_metrics_limit: int=TSDB_SEND_METRICS_PER_SECOND_LIMIT,
-                 send_metrics_batch_limit: int=TSDB_SEND_METRICS_BATCH_LIMIT):
+    def __init__(
+            self,
+            host: str = TSDB_HOST,
+            port: int = TSDB_PORT,
+            check_tsdb_alive: bool = False,
+            protocol: str = TSDBConnectProtocols.HTTP,
+            run_at_once: bool = True,
+            static_tags: dict = None,
+            host_tag: bool = True,
+            max_queue_size: int = TSDB_MAX_METRICS_QUEUE_SIZE,
+            http_compression: str = TSDB_DEFAULT_HTTP_COMPRESSION,
+            uri: str = TSDB_URI,
+            send_metrics_limit: int = TSDB_SEND_METRICS_PER_SECOND_LIMIT,
+            send_metrics_batch_limit: int = TSDB_SEND_METRICS_BATCH_LIMIT,
+            put_endpoint: str = TSDB_PUT_ENDPOINT,
+            version_endpoint: str = TSDB_VERSION_ENDPOINT,
+    ):
 
         self.host_tag = host_tag
         self.protocol = protocol
@@ -55,12 +61,17 @@ class TSDBClient:
         self._metric_send_thread = None
 
         if run_at_once is True:
-            self.init_client(host, port, uri)
+            self.init_client(host, port, uri, put_endpoint, version_endpoint)
 
-    def init_client(self, host, port: int=TSDB_PORT, uri: Optional[str]=None):
+    def init_client(
+            self, host, port: int = TSDB_PORT, uri: Optional[str] = None,
+            put_endpoint: str = TSDB_PUT_ENDPOINT,
+            version_endpoint: str = TSDB_VERSION_ENDPOINT
+    ):
         self._tsdb_connect = TSDBConnectProtocols.get_connect(
             self.protocol, host, port, self.check_tsdb_alive,
-            compression=self.http_compression, uri=uri
+            compression=self.http_compression, uri=uri,
+            put_endpoint=put_endpoint, version_endpoint=version_endpoint
         )
 
         self._metric_send_thread = TSDBConnectProtocols.get_push_thread(
